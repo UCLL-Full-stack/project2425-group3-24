@@ -1,13 +1,9 @@
-// src/services/GameService.ts
 import { Game } from '../model/game';
 import gameDb from '../repository/game.db';
 
 export class GameService {
     private readonly maxAttempts = 10;
 
-    /**
-     * Generates a random 4-letter uppercase code.
-     */
     private generateCode(): string {
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let code = "";
@@ -17,14 +13,6 @@ export class GameService {
         return code;
     }
 
-    /**
-     * Creates a new game with a unique code.
-     * @param cardDeckId - ID of the card deck.
-     * @param timeLimit - Time limit for the game.
-     * @param maxPlayers - Maximum number of players.
-     * @param winCondition - Winning condition.
-     * @returns The created game if successful, otherwise an error.
-     */
     createGame(cardDeckId: number, timeLimit: number, maxPlayers: number, winCondition: number): Game | Error {
         let attempts = 0;
 
