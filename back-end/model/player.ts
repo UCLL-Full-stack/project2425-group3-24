@@ -1,34 +1,112 @@
+import {
+    Player as PlayerPrisma,
+    PlayerInRound as PlayerInRoundPrisma,
+    Round as RoundPrisma
+} from '@prisma/client';
+import { PlayerInRound } from './playerInRound';
+
 export class Player {
-    private id: number;
+    private id?: number;
+    private gameCode?: string;
+    private rounds: PlayerInRound[];
+    private cardCzarRoundIds: number[];
+    private winningRoundIds: number[];
     private username: string;
     private score: number;
-    private is_host: boolean;
 
     constructor(player: {
-        id: number
-        username: string,
-        score: number,
-        is_host: boolean
+        id?: number;
+        gameCode?: string;
+        rounds?: PlayerInRound[];
+        cardCzarRoundIds?: number[];
+        winningRoundIds?: number[];
+        username: string;
+        score: number;
     }) {
+        this.validate(player);
+
         this.id = player.id;
+        this.gameCode = player.gameCode;
+        this.rounds = player.rounds || [];
+        this.cardCzarRoundIds = player.cardCzarRoundIds || [];
+        this.winningRoundIds = player.winningRoundIds || [];
         this.username = player.username;
         this.score = player.score;
-        this.is_host = player.is_host
     }
 
-    getId() {
+    getId(): number | undefined {
         return this.id;
     }
 
-    getUsername() {
+    setGameCode(gameCode: string | undefined) {
+        this.gameCode = gameCode;
+    }
+
+    getGameCode(): string | undefined {
+        return this.gameCode;
+    }
+
+    getRounds(): PlayerInRound[] {
+        return this.rounds;
+    }
+
+    getCardCzarRoundIds(): number[] {
+        return this.cardCzarRoundIds;
+    }
+
+    getWinningRoundIds(): number[] {
+        return this.winningRoundIds;
+    }
+
+    setUsername(username: string) {
+        this.username = username;
+    }
+
+    getUsername(): string {
         return this.username;
     }
 
-    getScore() {
+    addScore(score: number) {
+        this.score += score;
+    }
+
+    getScore(): number {
         return this.score;
     }
 
-    getIsHost() {
-        return this.is_host;
+    validate(player: {
+        username: string;
+        score?: number;
+    }) {
+        if (!player.username?.trim()) {
+            throw new Error('Username is required');
+        }
+        if (player.score! < 0) {
+            throw new Error("Score must be a positive integer or zero");
+        }
+    }
+
+    static from({
+        id,
+        gameCode,
+        rounds,
+        cardCzarRounds,
+        winningRounds,
+        username,
+        score
+    }: PlayerPrisma & {
+        rounds: PlayerInRoundPrisma[];
+        cardCzarRounds: RoundPrisma[];
+        winningRounds: RoundPrisma[];
+    }) {
+        return new Player({
+            id,
+            gameCode: gameCode || undefined,
+            rounds: rounds.map((round) => PlayerInRound.from(round)),
+            cardCzarRoundIds: cardCzarRounds.map((cardCzarRound) => cardCzarRound.id),
+            winningRoundIds: winningRounds.map((winningRound) => winningRound.id),
+            username,
+            score
+        });
     }
 }

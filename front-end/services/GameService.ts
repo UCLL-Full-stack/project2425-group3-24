@@ -1,20 +1,13 @@
-const createGame = async () => {
-  return await fetch(process.env.NEXT_PUBLIC_API_URL + "/games/create", {
+const createGame = (hostPlayerId: number) => {
+  return fetch(process.env.NEXT_PUBLIC_API_URL + "/game/create", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      card_deck_id: 1,
-      time_limit: 60,
-      max_players: 10,
-      win_condition: 500
-    })
+    body: JSON.stringify({ hostPlayerId: hostPlayerId })
   });
 };
 
-const GameService = {
-  createGame
-};
+const GameService = { createGame };
 
 export default GameService;

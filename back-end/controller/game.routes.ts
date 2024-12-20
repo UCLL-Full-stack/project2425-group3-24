@@ -1,29 +1,48 @@
-import { GameService } from "../service/game.service";
-import express, { Request, Response } from "express";
-import gameRepository from "../repository/game.db";
+import express, { NextFunction, Request, Response } from "express";
+import { GameInput } from "../types";
+import gameService from "../service/game.service";
 
-const router = express.Router();
-const gameService = new GameService();
+const gameRouter = express.Router();
 
-router.post("/create", (req: Request, res: Response) => {
-    const { card_deck_id, time_limit, max_players, win_condition } = req.body;
+/**
+ * @swagger
+ * tags:
+ *   - name: Game
+ *     description: Operations related to game management
+ */
 
-    if (card_deck_id === undefined || time_limit === undefined || max_players === undefined || win_condition === undefined) {
-        return res.status(400).json({ error: "All fields are required" });
+/**
+ * @swagger
+ * /api/game/create:
+ *   post:
+ *     summary: Create a new game
+ *     description: Create a new game by providing a host player ID.
+ *     tags: [Game]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               hostPlayerId:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Game created successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Internal server error
+ */
+gameRouter.post('/create', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const gameInput = <GameInput>req.body;
+        const game = await gameService.createGame(gameInput);
+        res.status(200).json(game);
+    } catch (error) {
+        next(error);
     }
-
-    const result = gameService.createGame(card_deck_id, time_limit, max_players, win_condition);
-
-    if (result instanceof Error) {
-        return res.status(500).json({ error: result.message });
-    }
-
-    return res.status(201).json({ game: result });
 });
 
-router.get("/", (req: Request, res: Response) => {
-    const games = gameRepository.getAllGames();
-    return res.status(200).json({ games });
-});
-
-export default router;
+export { gameRouter };

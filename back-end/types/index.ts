@@ -1,14 +1,73 @@
-type Game = {
-    game_code: string,
-    card_deck_id: number,
-    time_limit: number,
-    max_players: number,
-    win_condition: number
+type GameInput = {
+    gameCode: string,
+    hostPlayerId: number,
+    cardDeckId: number,
+    playerIds: number[],
+    roundIds: number[],
+    timeLimit: number,
+    maxPlayers: number,
+    winCondition: number
 }
 
-type Player = {
-    id: number,
-    username: string,
-    score: number,
-    is_host: boolean
+type PlayerInput = {
+    id?: number,
+    gameCode: string,
+    hostGameCode: string,
+    rounds: PlayerInRoundInput[],
+    cardCzarRoundIds: number[],
+    winningRoundIds: number[],
+    username?: string,
+    score?: number
 }
+
+type PlayerInRoundInput = {
+    playerId: number,
+    roundId: number,
+    whiteCardId: number
+}
+
+type RoundInput = {
+    id?: number,
+    gameCode: number,
+    cardCzarId: number,
+    winnerId: number,
+    blackCard: BlackCardInput,
+    players: PlayerInRoundInput[],
+    roundNumber: number
+}
+
+type WhiteCardInput = {
+    id?: number,
+    playerInRounds: PlayerInRoundInput[],
+    text: string
+}
+
+type BlackCardInput = {
+    id?: number,
+    roundIds: number[],
+    decks: CardInDeckInput[],
+    text: string
+}
+
+type CardInDeckInput = {
+    blackCardId: number,
+    cardDeckId: number
+}
+
+type CardDeckInput = {
+    id?: number,
+    cards: CardInDeckInput[],
+    deckName: string
+}
+
+export {
+    GameInput,
+    PlayerInput,
+    PlayerInRoundInput,
+    RoundInput,
+    WhiteCardInput,
+    BlackCardInput,
+    CardInDeckInput,
+    CardDeckInput
+}
+

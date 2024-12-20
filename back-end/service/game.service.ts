@@ -1,39 +1,36 @@
-import { Game } from '../model/game';
-import gameDb from '../repository/game.db';
+import { Game } from "../model/game";
+import gameDB from "../repository/game.db";
+import { GameInput } from "../types";
+import cardDeckService from "./cardDeck.service";
 
-export class GameService {
-    private readonly maxAttempts = 10;
-
-    private generateCode(): string {
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let code = "";
-        for (let i = 0; i < 4; i++) {
-            code += letters.charAt(Math.floor(Math.random() * letters.length));
-        }
-        return code;
+const createGame = async ({ hostPlayerId, cardDeckId }: GameInput): Promise<Game> => {
+    if (!cardDeckId) {
+        cardDeckId = 0;
     }
+    
+    const cardDeck = await cardDeckService.getCardDeckById(cardDeckId);
+    const game = new Game({ hostPlayerId: hostPlayerId, cardDeck: cardDeck });
 
-    createGame(cardDeckId: number, timeLimit: number, maxPlayers: number, winCondition: number): Game | Error {
-        let attempts = 0;
+    return await gameDB.createGame(game);
+};
 
-        while (attempts < this.maxAttempts) {
-            const code = this.generateCode();
+const deleteGameByGameCode = async (gameCode: string) => {
+    await gameDB.deleteGameByGameCode(gameCode);
 
-            if (!gameDb.gameExists(code)) {
-                const newGame = new Game({
-                    game_code: code,
-                    card_deck_id: cardDeckId,
-                    time_limit: timeLimit,
-                    max_players: maxPlayers,
-                    win_condition: winCondition
-                });
-                gameDb.addGame(newGame);
-                return newGame;
-            }
+    return;
+};
 
-            attempts++;
-        }
+const getGameByGameCode = async (gameCode: string): Promise<Game | null> => {
+    let game = await gameDB.getGameByGameCode(gameCode);
+    if (!game) {
+        //throw new Error(`Game with game code ${gameCode} does not exist.`);
+        game = null;
+    }    
+    return game;
+};
 
-        return new Error("Unable to generate a unique game code. Please try again.");
-    }
-}
+export default { 
+    createGame,
+    deleteGameByGameCode,
+    getGameByGameCode
+};
